@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 DIRNAME=$(dirname $(readlink --canonicalize $0))
 [ -f "${DIRNAME}/functions.sh" ] && . "${DIRNAME}/functions.sh"
 
@@ -48,6 +48,6 @@ else
 fi
 
 end_packet_capture ${HTTP_CONNECT_PCAP_PID}
-wait
+
 
 

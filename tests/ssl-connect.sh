@@ -25,6 +25,6 @@ SSL_CONNECT_PCAP_PID=$!
 openssl s_client -connect ${SSL_CONNECT_HOST}:${SSL_CONNECT_PORT} -debug -msg -state -showcerts </dev/null
 
 end_packet_capture ${SSL_CONNECT_PCAP_PID}
-wait
+
 
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 DIRNAME=$(dirname $(readlink --canonicalize $0))
 
 [ -f "${DIRNAME}/functions.sh" ] && . "${DIRNAME}/functions.sh"
@@ -22,6 +22,3 @@ DNS_LOOKUP_PCAP_PID=$!
 dig "$1" +trace
 
 end_packet_capture ${DNS_LOOKUP_PCAP_PID}
-wait
-
-

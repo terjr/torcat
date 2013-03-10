@@ -20,11 +20,12 @@ TOR_CONNECT_PCAP_PID=$!
 
 wget \
   --debug \
-  --output-document=status-vote-current-consensus-${TOR_CONNECT_HOST}-${TOR_CONNECT_PORT} \
+  --quiet \
+  --tries=1 \
   --connect-timeout=5 \
   --read-timeout=30 \
-  --tries=1 \
+  --output-document=status-vote-current-consensus-${TOR_CONNECT_HOST}-${TOR_CONNECT_PORT} \
   http://${TOR_CONNECT_HOST}:${TOR_CONNECT_PORT}/tor/status-vote/current/consensus
 
 end_packet_capture ${TOR_CONNECT_PCAP_PID}
-wait
+
