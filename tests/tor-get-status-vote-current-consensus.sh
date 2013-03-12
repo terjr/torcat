@@ -22,8 +22,8 @@ wget \
   --debug \
   --quiet \
   --tries=1 \
-  --connect-timeout=5 \
-  --read-timeout=30 \
+  --connect-timeout=30 \
+  --read-timeout=120 \
   --output-document=status-vote-current-consensus-${TOR_CONNECT_HOST}-${TOR_CONNECT_PORT} \
   http://${TOR_CONNECT_HOST}:${TOR_CONNECT_PORT}/tor/status-vote/current/consensus
 

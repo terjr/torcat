@@ -221,12 +221,17 @@ function test_tor_consensus() {
 ###############################################################################
 
 function test_tor_guard_ssl_connect() {
-  [ -z "$(find -name 'status-vote-current-consensus-*')" ] && return
+
+  log_notice "TEST: Connecting to Tor guard nodes using SSL"
+
+  CONSENSUS=$(find ./status-vote-current-consensus-* ../status-vote-current-consensus-* -prune 2>/dev/null | head -1)
+  [ -z "${CONSENSUS}" ] && return
   while read GUARD_ADDR GUARD_PORT; do
+    log_info "    * SSL ${GUARD_ADDR} ${GUARD_PORT}"
     ${TESTS_DIR}/ssl-connect.sh ssl-connect-tor-guard ${GUARD_ADDR} ${GUARD_PORT} \
-      2> ssl-connect-tor-guard-${GUARD_ADDR}-${GUARD_PORT}.err \
-    | tee ssl-connect-tor-guard-${GUARD_ADDR}-${GUARD_PORT}.log
-  done < <( grep --no-filename -B 1 '^s.*\<Guard\>' status-vote-current-consensus-* \
+      1> ssl-connect-tor-guard-${GUARD_ADDR}-${GUARD_PORT}.log \
+      2> ssl-connect-tor-guard-${GUARD_ADDR}-${GUARD_PORT}.err
+  done < <( grep --no-filename -B 1 '^s.*\<Guard\>' ${CONSENSUS} \
           | grep '^r' \
           | awk '/^r/{if(0 != $NF)print $(NF-2), $(NF-1)}' )
 }
