@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 DIRNAME=$(dirname $(readlink --canonicalize $0))
 
 [ -f "${DIRNAME}/functions.sh" ] && . "${DIRNAME}/functions.sh"

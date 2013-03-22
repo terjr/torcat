@@ -2,6 +2,11 @@
 DIRNAME=$(dirname $(readlink --canonicalize $0))
 [ -f "${DIRNAME}/tests/functions.sh" ] && . "${DIRNAME}/tests/functions.sh"
 
+# Set up the path to include 'sbin' directories too...
+[[ $PATH =~ (^|:)/usr/local/sbin(:|$) ]] || export PATH=${PATH}:/usr/local/sbin
+[[ $PATH =~ (^|:)/usr/sbin(:|$) ]] || export PATH=${PATH}:/usr/sbin
+[[ $PATH =~ (^|:)/sbin(:|$) ]] || export PATH=${PATH}:/sbin
+
 TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
 
 BRIDGES_TORPROJECT_ORG_IP='38.229.72.19'
@@ -224,8 +229,11 @@ function test_tor_guard_ssl_connect() {
 
   log_notice "TEST: Connecting to Tor guard nodes using SSL"
 
-  CONSENSUS=$(find ./status-vote-current-consensus-* ../status-vote-current-consensus-* -prune 2>/dev/null | head -1)
-  [ -z "${CONSENSUS}" ] && return
+  CONSENSUS=$(find ./status-vote-current-consensus-* ../status-vote-current-consensus-* -prune -size +500k 2>/dev/null | head -1)
+  if [ -z "${CONSENSUS}" ]; then
+    log_warning " !! - Could not find a consensus document"
+    return
+  fi
   while read GUARD_ADDR GUARD_PORT; do
     log_info "    * SSL ${GUARD_ADDR} ${GUARD_PORT}"
     ${TESTS_DIR}/ssl-connect.sh ssl-connect-tor-guard ${GUARD_ADDR} ${GUARD_PORT} \
@@ -234,32 +242,6 @@ function test_tor_guard_ssl_connect() {
   done < <( grep --no-filename -B 1 '^s.*\<Guard\>' ${CONSENSUS} \
           | grep '^r' \
           | awk '/^r/{if(0 != $NF)print $(NF-2), $(NF-1)}' )
-}
-
-
-###############################################################################
-# TEST: Captive Portal
-###############################################################################
-
-function test_captive_portal() {
-  log_info "TEST: Captive Portal Test"
-  for url in $1; do
-    CLEAN_URL=$(echo $url | tr --squeeze-repeat --complement '[:alnum:]' '-' | sed 's/-$//g')
-    log_info "    * HTTP $url"
-    ${TESTS_DIR}/http-connect.sh $url \
-      1> captive-portal-${CLEAN_URL}.log \
-      2> captive-portal-${CLEAN_URL}.err
-  done
-
-  for logfile in captive-portal-*.log; do
-    NEXT_LOG=${logfile}
-    if [ ! -z "${THIS_LOG}" ]; then
-      diff --unified=0 ${THIS_LOG} ${NEXT_LOG} | wc -l
-    fi
-    THIS_LOG=${NEXT_LOG}
-  done
-  
-    
 }
 
 ###############################################################################
@@ -272,7 +254,6 @@ function main() {
   test_www_torproject_org
   test_tor_consensus
   test_tor_guard_ssl_connect
-#  test_captive_portal http://google.com
 }
 
 main "$@"
